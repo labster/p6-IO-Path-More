@@ -39,12 +39,12 @@ submethod BUILD(:$!basename, :$!directory, :$!volume, :$dir, :$OS) {
 }
 
 # Another IO::Path override due to the $volume, and the use of catpath.
-method path(IO::Path:D:) {
+method path(IO::Path::More:D:) {
 	$Spec.catpath($.volume, ($.directory eq '.' ?? '' !! $.directory), $.basename);
 }
 # Final override, because I like full path on stringification better
 #   and it seems like less of a surprise.
-multi method Str(IO::Path:D:) {
+multi method Str(IO::Path::More:D:) {
 	self.path;
 }
 
@@ -65,11 +65,11 @@ method resolve {
 	fail "Not Yet Implemented: requires readlink()";
 }
 
-method absolute {
-	return self.new($Spec.rel2abs($.path))
+method absolute ($base = Str) {
+	return self.new($Spec.rel2abs($.path, $base))
 }
 
-method relative ($relative_to_directory as Str = Str) {
+method relative ($relative_to_directory = Str) {
 	return self.new($Spec.abs2rel($.path, $relative_to_directory));
 }
 
@@ -91,7 +91,7 @@ method parent {
 	}
 }
 
-multi method append (*@nextpaths) {
+method append (*@nextpaths) {
 	my $lastpath = @nextpaths.pop // '';
 	self.new($Spec.catpath($.volume, $Spec.catdir($.directory, $.basename, @nextpaths), $lastpath));
 }
