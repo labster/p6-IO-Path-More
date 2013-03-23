@@ -53,6 +53,7 @@ Which I'm just going to list for now:
 * directory
 * volume
 * cleanup  # usually called by default, unless you call .new with all named parameters
+* find(:$name, :$type, Bool :$recursive = True)  # Calls File::Find, which is not 100% cross-platform yet.
 
 Not yet implemented due to missing features in Rakudo:
 * touch
