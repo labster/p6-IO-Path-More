@@ -34,7 +34,9 @@ IO::Path::More - Extends IO::Path to make it more like p5's Path::Class
 	
 ## DESCRIPTION
 
-IO::Path::More is intended to be a cross-platform replacement for the built-in IO::Path.  Internally, we use File::Spec to deal with all of the issues on differing paths on different operating systems.  Currently, only Win32 and Unix-type systems are finished (including Mac OS X) in File::Spec, but support should get better as File::Spec gains more OSes.
+IO::Path::More is intended to be a cross-platform replacement for the built-in IO::Path.  Internally, we use File::Spec to deal with all of the issues on differing paths on different operating systems, so you don't have to.
+
+Currently, only Win32 and Unix-type systems are finished (including Mac OS X) in P6 File::Spec, but support should get better as File::Spec gains more OSes.
 
 ## INTERFACE
 
@@ -81,7 +83,7 @@ The same caveat on foreign file systems applies here.
 #### parent()
 Returns the parent of the current path as a new object.  Warning, this does not check for symbolic links -- only the written path as given will be considered.
 
-On a Unix/POSIX filesystem, it will work like so:
+On a Unix/POSIX filesystem, if called recursively, it will work like so:
 
 	parent level          relative       absolute
 	Starting Path (0)     foo/bar        /foo/bar
@@ -92,7 +94,7 @@ On a Unix/POSIX filesystem, it will work like so:
 	5                     ../../..          /
 
 #### append( *@parts )
-Concatenates anything passed onto the end of the path, and returns the result in a new object.  For example, `(path "/foo").append(<bar baz/zig>)` will return a path of `/foo/bar/baz/zig`.
+Concatenates anything passed onto the end of the path, and returns the result in a new object.  For example, `path("/foo").append(<bar baz/zig>)` will return a path of `/foo/bar/baz/zig`.
 
 #### find(:$name, :$type, Bool :$recursive = True)
 Calls File::Find with the given options, which are explained in the File::Find documentation.  Note that File::Find is not 100% cross-platform yet, so beware on systems where '/' is not a path separator.
@@ -147,4 +149,6 @@ Contact the author at bslaabs@gmail.com or as labster on #perl6.  File [bug repo
 
 ## COPYRIGHT
 
-The code under the same terms as Perl 6; see the LICENSE file for details.
+This code is free software, licensed under the same terms as Perl 6; see the LICENSE file for details.
+
+Some methods are based on code originally written by Ken Williams for the Perl 5 module [Path::Class](http://search.cpan.org/~kwilliams/Path-Class/README.pod).
