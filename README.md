@@ -120,13 +120,13 @@ Not yet implemented due to missing modules:
 ### Filetest methods
 
 #### .e, .d, .l, etc...
-Builtin methods are reproduced here.  Because we inherit from IO::Path, IO::Path::More does IO::Filetestable.
+Builtin methods are reproduced here.  Because we inherit from IO::Path, IO::Path::More does IO::Filetestable.  See [S32/IO](http://perlcabal.org/syn/S32/IO.html) for details.
 
 #### inode
 Returns the inode number of the current path as an Int.  If you're not on a POSIX system, returns False.  Inode numbers uniquely identify files on a given device, and all hard links point to the same inode.
 
 #### device
-Returns the device number of the current path.
+Returns the device number of the current path from a stat call.  This is not the same as `.volume`, though both identify the disk/drive/partition.
 
 ## TODO
 
