@@ -1,6 +1,7 @@
 class IO::Path::More is IO::Path;
 
 use File::Spec;
+use File::Find;
 my $Spec = File::Spec.new;
 
 has Str $.basename;
@@ -97,12 +98,31 @@ method append (*@nextpaths) {
 }
 
 
+method remove {
+	if self.d { rmdir  self.path }
+	else      { unlink self.path }
+}
+
+
+method rmtree {
+	fail "Not Yet Implemented: requires File::Path";
+}
+
+method mkpath {
+	fail "Not Yet Implemented: requires File::Path";
+}
+
 method touch {
 	fail "Not Yet Implemented: requires utime()";
 }
 
 method stat {
 	fail "Not Yet Implemented: requires stat()";
+}
+
+method find (:$name, :$type, Bool :$recursive = True) {
+	#find(dir => $.path, :$name, :$type, :$recursive);
+	find(dir => $.path, :$name, :$type)
 }
 
 # Some methods added in the absence of a proper IO.stat call
