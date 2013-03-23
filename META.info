@@ -1,8 +1,8 @@
 {
-  "name"        : "Lingua::Number",
+  "name"        : "IO::Path::More",
   "version"     : "*",
-  "description" : "Write cardinal and ordinal numbers with words in over fifty languages",
+  "description" : "Extends IO::Path to make it more like p5's Path::Class",
   "author"      : "labster",
-  "depends"     : [ "XML", "JSON::Tiny" ],
-  "source-url"  : "git://github.com/labster/p6-Lingua-Number.git"
+  "depends"     : [ "File::Spec", "File::Tools" ],
+  "source-url"  : "git://github.com/labster/p6-IO-Path-More.git"
 }
