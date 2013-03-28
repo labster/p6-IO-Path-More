@@ -2,7 +2,7 @@ class IO::Path::More is IO::Path;
 
 use File::Spec;
 use File::Find;
-my $Spec = File::Spec.new;
+my $Spec;
 
 has Str $.basename;
 has Str $.directory;
@@ -19,21 +19,15 @@ multi sub path (:$basename, :$directory, :$volume = '') is export {
 ##################################################
 
 # Constructors.  Need to override IO::Path due to $:volume.
-multi method new(Str:D $path) {
+multi method new(Str:D $path, :$OS = $*OS) {
+	$Spec = File::Spec.new(:$OS);
 	my ($volume, $directory, $basename) = $Spec.splitpath($Spec.canonpath($path));
 	$directory = $Spec.curdir if $directory eq '';
-	self.new(:$basename, :$directory, :$volume);
+	self.new(:$basename, :$directory, :$volume, :$OS);
 }
-
-#multi method new(Str:D $path, :$OS) {
-#	$Spec = File::Spec.new(:$OS);
-#	my ($volume, $directory, $basename) = $Spec.splitpath($Spec.canonpath($path));
-#	$directory = $Spec.curdir if $directory eq '';
-#	self.new(:$basename, :$directory, :$volume, :$OS);
-#}
 	
 
-submethod BUILD(:$!basename, :$!directory, :$!volume, :$dir, :$OS) {
+submethod BUILD(:$!basename, :$!directory, :$!volume, :$dir, :$OS = $*OS) {
 	die "Named paramter :dir in IO::Path.new deprecated in favor of :directory"
 	    if defined $dir;
 	$Spec = File::Spec.new(:$OS);
@@ -50,11 +44,11 @@ multi method Str(IO::Path::More:D:) {
 }
 
 
-method is_absolute {
+method is-absolute {
 	$Spec.file_name_is_absolute($.path);
 }
 
-method is_relative {
+method is-relative {
 	! $Spec.file_name_is_absolute($.path);
 }
 
@@ -76,7 +70,7 @@ method relative ($relative_to_directory = Str) {
 
 method parent {
 	my @dirs = $Spec.splitdir($.directory);
-	if self.is_absolute {
+	if self.is-absolute {
 		return self.new($Spec.catpath($.volume, $Spec.catdir(@dirs), ''));
 		# catdir to get rid of trailing slash; '' instead of basename.
 	}

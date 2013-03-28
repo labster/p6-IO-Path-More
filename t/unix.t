@@ -15,10 +15,10 @@ is ~path(".."),				"..",		"parent directory";
 # is path(''),				".",		"empty is current directory";
 is ~path("//usr/////local/./bin/././perl/"), "/usr/local/bin/perl", "canonpath called";
 
-ok path("foo/bar").is_relative,		"relative path is_relative";
-nok path("foo/bar").is_absolute,	"relative path ! is_absolute";
-nok path("/foo/bar").is_relative,	"absolute path ! is_relative";
-ok path("/foo/bar").is_absolute,	"absolute path is_absolute";
+ok path("foo/bar").is-relative,		"relative path is-relative";
+nok path("foo/bar").is-absolute,	"relative path ! is-absolute";
+nok path("/foo/bar").is-relative,	"absolute path ! is-relative";
+ok path("/foo/bar").is-absolute,	"absolute path is-absolute";
 
 is path("foo/bar").absolute,		"$*CWD/foo/bar",	"absolute path from \$*CWD";
 is path("foo/bar").absolute("/usr"),	"/usr/foo/bar",		"absolute path specified";
@@ -31,7 +31,6 @@ is path(".").parent,			"..",			"parent of '.' is '..'";
 is path("..").parent,			"../..",		"parent of '..' is '../..'";
 is path("/foo").parent,			"/",			"parent at root is '/'";
 is path("/").parent,			"/",			"parent of root is '/'";
-
 
 is path("/").append('foo'),		"/foo",			"append to root";
 is path(".").append('foo', 'bar'),	"foo/bar",		"append multiple";
