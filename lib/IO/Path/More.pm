@@ -19,41 +19,38 @@ multi sub path (:$basename, :$directory, :$volume = '') is export {
 ##################################################
 
 # Constructors.  Need to override IO::Path due to $:volume.
-multi method new(Str:D $path, :$OS = $*OS) {
-	$Spec = File::Spec.new(:$OS);
-	my ($volume, $directory, $basename) = $Spec.splitpath($Spec.canonpath($path));
-	$directory = $Spec.curdir if $directory eq '';
+multi method new(Str:D $path is copy, :$OS = $*OS, :$raw = False) {
+	$Spec := File::Spec.os($OS);
+	$path = $Spec.canonpath($path) unless $raw;
+	my ($volume, $directory, $basename) = $Spec.split($path);
 	self.new(:$basename, :$directory, :$volume, :$OS);
 }
-	
 
 submethod BUILD(:$!basename, :$!directory, :$!volume, :$dir, :$OS = $*OS) {
 	die "Named paramter :dir in IO::Path.new deprecated in favor of :directory"
 	    if defined $dir;
-	$Spec = File::Spec.new(:$OS);
+	$Spec := File::Spec.os($OS);
 }
 
-# Another IO::Path override due to the $volume, and the use of catpath.
-method path(IO::Path::More:D:) {
-	$Spec.catpath($.volume, ($.directory eq '.' ?? '' !! $.directory), $.basename);
-}
-# Final override, because I like full path on stringification better
-#   and it seems like less of a surprise.
+# Another IO::Path override to make .path return self.
+method path {   self   }
+# Final override, until IO::Path is fixed
+#  specifically due to the $volume, and the use of join
 multi method Str(IO::Path::More:D:) {
-	self.path;
+	$Spec.join($.volume, $.directory, $.basename);
 }
 
 
 method is-absolute {
-	$Spec.file_name_is_absolute($.path);
+	$Spec.file-name-is-absolute(~self);
 }
 
 method is-relative {
-	! $Spec.file_name_is_absolute($.path);
+	! $Spec.file-name-is-absolute(~self);
 }
 
 method cleanup {
-	return self.new($Spec.canonpath($.path));
+	return self.new($Spec.canonpath(~self));
 }
 
 method resolve {
@@ -61,40 +58,39 @@ method resolve {
 }
 
 method absolute ($base = Str) {
-	return self.new($Spec.rel2abs($.path, $base))
+	return self.new($Spec.rel2abs(~self, $base))
 }
 
 method relative ($relative_to_directory = Str) {
-	return self.new($Spec.abs2rel($.path, $relative_to_directory));
+	return self.new($Spec.abs2rel(~self, $relative_to_directory));
 }
 
 method parent {
-	my @dirs = $Spec.splitdir($.directory);
 	if self.is-absolute {
-		return self.new($Spec.catpath($.volume, $Spec.catdir(@dirs), ''));
-		# catdir to get rid of trailing slash; '' instead of basename.
+		return self.new($Spec.join($.volume, $.directory, ''));
+		# empty instead of basename.
 	}
 	elsif all($.basename, $.directory) eq $Spec.curdir {
 		return self.new($Spec.updir);
 	}
 	elsif $.basename eq $Spec.updir && $.directory eq $Spec.curdir 
-	   or !grep({$_ ne $Spec.updir}, @dirs) {  # All updirs, then add one more
-		return self.new($Spec.catpath($.volume, $Spec.catdir(@dirs, $Spec.updir), $.basename));
+	   or !grep({$_ ne $Spec.updir}, $Spec.splitdir($.directory)) {  # All updirs, then add one more
+		return self.new($Spec.join($.volume, $Spec.catdir($.directory, $Spec.updir), $.basename));
 	}
 	else {
-		return self.new($Spec.catpath($.volume, $Spec.catdir(@dirs), ''));
+		return self.new( $Spec.join($.volume, $.directory, '') );
 	}
 }
 
 method append (*@nextpaths) {
 	my $lastpath = @nextpaths.pop // '';
-	self.new($Spec.catpath($.volume, $Spec.catdir($.directory, $.basename, @nextpaths), $lastpath));
+	self.new($Spec.join($.volume, $Spec.catdir($.directory, $.basename, @nextpaths), $lastpath));
 }
 
 
 method remove {
-	if self.d { rmdir  self.path }
-	else      { unlink self.path }
+	if self.d { rmdir  ~self }
+	else      { unlink ~self }
 }
 
 
@@ -115,18 +111,18 @@ method stat {
 }
 
 method find (:$name, :$type, Bool :$recursive = True) {
-	#find(dir => $.path, :$name, :$type, :$recursive);
-	find(dir => $.path, :$name, :$type)
+	#find(dir => ~self, :$name, :$type, :$recursive);
+	find(dir => ~self, :$name, :$type)
 }
 
 # Some methods added in the absence of a proper IO.stat call
 method inode() {
-	$*OS ne 'Win32'   #this could use a better way of asking "am I posixy?
+	$*OS ne any(<MSWin32 os2 dos NetWare symbian>)   #this could use a better way of asking "am I posixy?
 	&& self.e
-	&& nqp::p6box_i(nqp::stat(nqp::unbox_s($.path), pir::const::STAT_PLATFORM_INODE))
+	&& nqp::p6box_i(nqp::stat(nqp::unbox_s(~self), pir::const::STAT_PLATFORM_INODE))
 }
 
 method device() {
-	self.e && nqp::p6box_i(nqp::stat(nqp::unbox_s($.path), pir::const::STAT_PLATFORM_DEV))
+	self.e && nqp::p6box_i(nqp::stat(nqp::unbox_s(~self), pir::const::STAT_PLATFORM_DEV))
 }
 
