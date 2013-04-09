@@ -32,8 +32,14 @@ submethod BUILD(:$!basename, :$!directory, :$!volume, :$dir, :$OS = $*OS) {
 	$Spec := File::Spec.os($OS);
 }
 
-# Another IO::Path override to make .path return self.
-method path {   self   }
+# TODO: Another IO::Path override to make .path return self.
+#method path {   self   }
+# TODO: until IO::Path is updated to spec:
+method path(IO::Path::More:D:) {
+	$.Str
+}
+
+#method path(IO::Path::More:D: ) { self.Str }
 # Final override, until IO::Path is fixed
 #  specifically due to the $volume, and the use of join
 multi method Str(IO::Path::More:D:) {
@@ -119,10 +125,10 @@ method find (:$name, :$type, Bool :$recursive = True) {
 method inode() {
 	$*OS ne any(<MSWin32 os2 dos NetWare symbian>)   #this could use a better way of asking "am I posixy?
 	&& self.e
-	&& nqp::p6box_i(nqp::stat(nqp::unbox_s(~self), pir::const::STAT_PLATFORM_INODE))
+	&& nqp::p6box_i(nqp::stat(nqp::unbox_s(self.Str), pir::const::STAT_PLATFORM_INODE))
 }
 
 method device() {
-	self.e && nqp::p6box_i(nqp::stat(nqp::unbox_s(~self), pir::const::STAT_PLATFORM_DEV))
+	self.e && nqp::p6box_i(nqp::stat(nqp::unbox_s(self.Str), pir::const::STAT_PLATFORM_DEV))
 }
 

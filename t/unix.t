@@ -6,14 +6,14 @@ use Test;
 
 if $*OS ne any( <MSWin32 dos VMS MacOS> ) {
 
-plan 23;
+plan 25;
 
 is IO::Path::More.new("hello").Str,	"hello",	"class loaded";
-is ~path("foo/bar"),			"foo/bar",	"path() works";
-is ~path("."),				".",		"current directory";
-is ~path(".."),				"..",		"parent directory";
+is path("foo/bar"),			"foo/bar",	"path() works";
+is path("."),				".",		"current directory";
+is path(".."),				"..",		"parent directory";
 # is path(''),				".",		"empty is current directory";
-is ~path("//usr/////local/./bin/././perl/"), "/usr/local/bin/perl", "canonpath called";
+is path("//usr/////local/./bin/././perl/"), "/usr/local/bin/perl", "canonpath called";
 
 ok path("foo/bar").is-relative,		"relative path is-relative";
 nok path("foo/bar").is-absolute,	"relative path ! is-absolute";
@@ -24,12 +24,14 @@ is path("foo/bar").absolute,		"$*CWD/foo/bar",	"absolute path from \$*CWD";
 is path("foo/bar").absolute("/usr"),	"/usr/foo/bar",		"absolute path specified";
 is path("/usr/bin").relative("/usr"),	"bin",			"relative path specified";
 is path("foo/bar").absolute.relative,  "foo/bar",		"relative inverts absolute";
-# is path("/foo/bar").relative.absolute.resolve, "/foo/bar",	"absolute inverts relative";
+is path("foo/bar").absolute("/foo").relative("/foo"), "foo/bar","absolute inverts relative";
+# is path("/foo/bar").relative.absolute.resolve, "/foo/bar",	"absolute inverts relative with resolve";
 
-is path("foo/bar").parent,		"foo",			"parent";
+is path("foo/bar").parent,		"foo",			"parent of 'foo/bar' is 'foo'";
+is path("foo").parent,			".",			"parent of 'foo' is '.'";
 is path(".").parent,			"..",			"parent of '.' is '..'";
 is path("..").parent,			"../..",		"parent of '..' is '../..'";
-is path("/foo").parent,			"/",			"parent at root is '/'";
+is path("/foo").parent,			"/",			"parent at top level is '/'";
 is path("/").parent,			"/",			"parent of root is '/'";
 
 is path("/").append('foo'),		"/foo",			"append to root";
