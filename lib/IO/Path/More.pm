@@ -1,7 +1,7 @@
 class IO::Path::More is IO::Path;
 
 use File::Find;
-my $Spec;
+use Shell::Command;
 
 has Str $.basename;
 has Str $.directory;
@@ -30,11 +30,11 @@ method remove {
 
 
 method rmtree {
-	fail "Not Yet Implemented: requires File::Path";
+	rm_rf(~self)
 }
 
 method mkpath {
-	fail "Not Yet Implemented: requires File::Path";
+	mkpath(~self)
 }
 
 method touch {
@@ -46,8 +46,8 @@ method stat {
 }
 
 method find (:$name, :$type, Bool :$recursive = True) {
-	#find(dir => ~self, :$name, :$type, :$recursive);
-	find(dir => ~self, :$name, :$type)
+	find(dir => ~self, :$name, :$type, :$recursive);
+	#find(dir => ~self, :$name, :$type)
 }
 
 # Some methods added in the absence of a proper IO.stat call
