@@ -14,15 +14,11 @@ IO::Path::More - Extends IO::Path to make it more like p5's Path::Class
 	my @lines = $path1.open.lines;
 
 	# But wait, there's More!
-	say $path1.absolute;                    # "/current/directory/foo/bar/baz.txt"
-	say $path2.relative("/usr/local");      # "bin/perl6"
-	say $path1.is_absolute;                 # False
-	say $path1.is_relative;                 # True
-	say $path1.parent.append('quux.txt');   # "foo/bar/quux.txt"
-	$path1.=parent;                         # mutating method sets $path1 to "foo/bar"
-
-	# path cleanup happens automatically
-	say path "1///2/./3////4";              # "1/2/3/4"
+        $path3 = path "/new/directory/tree";
+        $path3.mkpath;              # makes /new, /new/directory, and /new/directory/tree
+	$path3.=append("erf", 'quux.txt');   # "/new/directory/tree/erf/quux.txt"
+        $path3.touch;               # makes an empty "quux.txt" file
+	path("/new").rmtree         # removes everything under "/new"
 
 	# Not quite working yet: Foreign paths
 	# It should work correctly if you run Windows, though.
@@ -52,47 +48,6 @@ Note that the methods do not actually transform the object, but rather return a 
 ## METHODS
 This module provides a class based interface to all sorts of filesystem related functions on paths:
 
-#### path and Str
-Returns the entire path, put together, as a string.
-
-#### basename
-Returns the name of the file as a string.
-
-#### directory
-Returns the directory portion of the file path as a string.  For example, for `/usr/bin/perl`, the result would be `"/usr/bin"`.
-
-#### volume
-Returns the volume portion of the file path, if such a thing has meaning on the current platform; otherwise it returns an empty string.  For example, with `C:\\WINDOWS\\SYSTEM32`, the string `"C:"` will be returned.
-
-#### is\_absolute
-Takes no arguments.  Returns True if the path is an absolute path, false otherwise.
-
-#### is\_relative
-Takes no arguments.  Returns True if the path is an relative path, false otherwise.  This is always the opposite result of is\_absolute.
-
-#### absolute( Str $base = $*CWD )
-Transforms the path into an absolute path (if it is not already absolute), and returns a new IO::Path::More object.  If you supply a base path, it will transform relative to that directory -- otherwise, it will just use the current working directory.  Returns a new IO::Path::More object.
-
-If you're doing this on a foreign file system, you had better provide the base, or you'll end up with something weird like `C:\\WINDOWS\\local/bin/perl6`.
-
-#### relative( Str $relative\_to\_directory = $*CWD)
-Transforms the path into a relative path, and returns the result in an IO::Path::More.  If no parameter is supplied, as above, the current working directory will be used as a default.
-
-The same caveat on foreign file systems applies here.
-
-#### parent()
-Returns the parent of the current path as a new object.  Warning, this does not check for symbolic links -- only the written path as given will be considered.
-
-On a Unix/POSIX filesystem, if called recursively, it will work like so:
-
-	parent level          relative       absolute
-	Starting Path (0)     foo/bar        /foo/bar
-	1                       foo            /foo
-	2                        .              /
-	3                        ..             /
-	4                      ../..            /
-	5                     ../../..          /
-
 #### append( *@parts )
 Concatenates anything passed onto the end of the path, and returns the result in a new object.  For example, `path("/foo").append(<bar baz/zig>)` will return a path of `/foo/bar/baz/zig`.
 
@@ -104,8 +59,14 @@ Deletes the current path.  Calls unlink if the path is a file, or calls rmdir if
 
 To remove an entire directory with its contents, see `rmtree`.
 
-#### cleanup
-Cleans up the path, using File::Spec.canonpath to do the work, and returns a new path.  Paths created with without named parameters (`basename` and the like) cleanup by default, so you shouldn't typically have to do this.
+#### rmtree
+Deletes the path, and all of the contents of that directory.  Equivalent
+to `rm -rf` on unix boxen.  Fails as remove above.
+
+#### mkpath
+
+Makes a directory path out of new directories, as necessary.  Equivalent
+to `mkdir -p` on the a linux machine.
 
 ### IO methods
 Methods included in IO::Path (notably .open, .close, and .contents) are available here.  See [S32/IO](http://perlcabal.org/syn/S32/IO.html) for details.
@@ -115,10 +76,6 @@ Not yet implemented due to missing features in Rakudo:
 * touch   (needs utime)
 * resolve (needs readlink)
 * stat    (needs stat)
-
-Not yet implemented due to missing modules:
-* mkpath (needs File::Path)
-* rmtree (needs File::Path)
 
 ### Filetest methods
 
