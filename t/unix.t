@@ -19,10 +19,10 @@ is path("/").append('foo'),		"/foo",			"append to root";
 is path(".").append('foo', 'bar'),	"foo/bar",		"append multiple";
 
 say "# IO tests";
-ok path($*CWD).e,		"cwd exists, inheritance ok";
+ok path(~$*CWD).e,		"cwd exists, inheritance ok";
 
-ok path($*CWD).inode,		"inode works";
-ok path($*CWD).device,		"device works";
+ok path(~$*CWD).inode,		"inode works";
+ok path(~$*CWD).device,		"device works";
 
 }
 else { plan 1; skip "all unix tests for now", 1; }
