@@ -4,7 +4,7 @@ use File::Find;
 use Shell::Command;
 
 has Str $.basename;
-has Str $.directory;
+has Str $.directory = '.';
 has Str $.volume = '';
 
 ##### Functions for Export: path() variants ######
@@ -59,5 +59,16 @@ method inode() {
 
 method device() {
 	self.e && nqp::p6box_i(nqp::stat(nqp::unbox_s(self.Str), nqp::const::STAT_PLATFORM_DEV))
+}
+
+method nextitem {
+	my @dir := self.parent.contents;
+	if self.e {
+		while (@dir.shift ne self.basename) { ; }
+		self.new(~@dir.shift);
+        }
+        else {
+		self.new(~first { self.basename leg $_ ~~ Increase}, @dir.sort);
+        }
 }
 
