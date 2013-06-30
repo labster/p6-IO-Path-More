@@ -1,21 +1,18 @@
-class IO::Path::More is IO::Path;
-
+use MONKEY_TYPING;
 use File::Find;
 use Shell::Command;
-
-has Str $.basename;
-has Str $.directory = '.';
-has Str $.volume = '';
 
 ##### Functions for Export: path() variants ######
 # because Str.path is already taken by IO::Path
 multi sub path (Str:D $path) is export {
-	IO::Path::More.new($path);
+	IO::Path.new($path);
 }
-multi sub path (:$basename, :$directory, :$volume = '') is export {
-	IO::Path::More.new(:$basename, :$directory, :$volume)
+multi sub path (:$basename!, :$directory = '.', :$volume = '') is export {
+	IO::Path.new(:$basename, :$directory, :$volume)
 }
 ##################################################
+
+augment class IO::Path {
 
 method append (*@nextpaths) {
 	my $lastpath = @nextpaths.pop // '';
@@ -30,11 +27,11 @@ method remove {
 
 
 method rmtree {
-	rm_rf(~self)
+	rm_rf($!path)
 }
-
+ 
 method mkpath {
-	mkpath(~self)
+	mkpath($!path)
 }
 
 method touch {
@@ -46,7 +43,7 @@ method stat {
 }
 
 method find (:$name, :$type, Bool :$recursive = True) {
-	find(dir => ~self, :$name, :$type, :$recursive);
+	find(dir => $!path, :$name, :$type, :$recursive);
 	#find(dir => ~self, :$name, :$type)
 }
 
@@ -61,14 +58,32 @@ method device() {
 	self.e && nqp::p6box_i(nqp::stat(nqp::unbox_s(self.Str), nqp::const::STAT_PLATFORM_DEV))
 }
 
-method nextitem {
+method next {
 	my @dir := self.parent.contents;
 	if self.e {
 		while (@dir.shift ne self.basename) { ; }
-		self.new(~@dir.shift);
+		@dir[0];
         }
         else {
-		self.new(~first { self.basename leg $_ ~~ Increase}, @dir.sort);
+		first { self.basename leg $_ ~~ Increase}, @dir.sort;
         }
 }
 
+method previous {
+	my @dir := self.parent.contents;
+	if self.e {
+                my $previtem = Nil;
+                for @dir -> $curritem {
+			last if $curritem eq $.basename;
+			$previtem := $curritem;
+		};
+		$previtem;
+        }
+        else {
+		first { self.basename leg $_ ~~ Decrease}, @dir.sort.reverse;
+        }
+}
+
+
+
+}
