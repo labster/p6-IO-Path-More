@@ -3,6 +3,6 @@
   "version"     : "*",
   "description" : "Extends IO::Path to make it more like p5's Path::Class",
   "author"      : "labster",
-  "depends"     : [ "File::Spec", "File::Tools" ],
+  "depends"     : [ "File::Find", "Shell::Command" ],
   "source-url"  : "git://github.com/labster/p6-IO-Path-More.git"
 }
