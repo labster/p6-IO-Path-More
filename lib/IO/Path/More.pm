@@ -65,7 +65,7 @@ method next {
         @dir[0];
     }
     else {
-        first { self.basename leg $_ ~~ Increase}, @dir.sort;
+        first { self.basename leg $_ ~~ Less }, @dir.sort;
     }
 }
 
@@ -80,7 +80,7 @@ method previous {
         $previtem;
     }
     else {
-        first { self.basename leg $_ ~~ Decrease}, @dir.sort.reverse;
+        first { self.basename leg $_ ~~ More }, @dir.sort.reverse;
     }
 }
 
