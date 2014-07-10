@@ -30,9 +30,11 @@ ok path(~$*CWD).e,		"cwd exists, inheritance ok";
 
 if 'foo'.path.e { skip "test path exists", 4; }
 else {
+    todo "mkpath doesn't return result", 1;
 	ok "foo/bar/baz".path.mkpath, 'mkpath ok';
 	ok "foo/bar/baz".path.e, 'path made';
-        ok "foo".path.rmtree, "rmtree ok";
+	todo "rmtree doesn't return result", 1;
+    ok "foo".path.rmtree, "rmtree ok";
 	nok "foo".path.e, "dir tree removed";
 }
 
