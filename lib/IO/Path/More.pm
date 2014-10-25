@@ -72,7 +72,7 @@ method next {
 method previous {
     my @dir := self.parent.contents;
     if self.e {
-        my $previtem = Nil;
+        my $previtem := Nil;
         for @dir -> $curritem {
             last if $curritem eq $.basename;
             $previtem := $curritem;
