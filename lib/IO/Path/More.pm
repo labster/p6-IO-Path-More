@@ -1,4 +1,4 @@
-use MONKEY_TYPING;
+use MONKEY-TYPING;
 use File::Find;
 use Shell::Command;
 
