@@ -47,5 +47,5 @@ if $*DISTRO.name ne any( <MSWin32 dos VMS MacOS> ) {
 }
 else { skip "all unix tests for now", 2; }
 
-done;
+done-testing;
 
